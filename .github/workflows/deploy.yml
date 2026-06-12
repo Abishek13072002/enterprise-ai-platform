@@ -2,38 +2,39 @@ name: Deploy to EKS
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Configure AWS credentials
-  uses: aws-actions/configure-aws-credentials@v4
-  with:
-    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    aws-region: ap-south-1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Build Docker image
-      run: docker build -t enterprise-ai-app .
+      - name: Build Docker image
+        run: docker build -t enterprise-ai-app .
 
-    - name: Tag Docker image
-      run: docker tag enterprise-ai-app:latest ${{ steps.login-ecr.outputs.registry }}/enterprise-ai-app:latest
+      - name: Tag Docker image
+        run: docker tag enterprise-ai-app:latest ${{ steps.login-ecr.outputs.registry }}/enterprise-ai-app:latest
 
-    - name: Push Docker image
-      run: docker push ${{ steps.login-ecr.outputs.registry }}/enterprise-ai-app:latest
+      - name: Push Docker image
+        run: docker push ${{ steps.login-ecr.outputs.registry }}/enterprise-ai-app:latest
 
-    - name: Update kubeconfig
-      run: aws eks update-kubeconfig --name dev-eks --region ap-south-1
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name dev-eks --region ap-south-1
 
-    - name: Deploy to EKS
-      run: kubectl apply -f app-deployment.yaml
+      - name: Deploy to EKS
+        run: kubectl apply -f app-deployment.yaml
