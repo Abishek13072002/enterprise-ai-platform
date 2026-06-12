@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-ai-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: enterprise-ai-app
+  template:
+    metadata:
+      labels:
+        app: enterprise-ai-app
+    spec:
+      containers:
+      - name: enterprise-ai-app
+        image: 859925121306.dkr.ecr.ap-south-1.amazonaws.com/enterprise-ai-app:latest
+        ports:
+        - containerPort: 5000
